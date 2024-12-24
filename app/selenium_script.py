@@ -1,43 +1,73 @@
+import uuid
+from datetime import datetime
+from pymongo import MongoClient
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
-from datetime import datetime
-import requests
-import os
+import socket
+from flask import Flask, jsonify
 
-def fetch_trending_topics():
-    # ProxyMesh setup
-    proxy_url = os.getenv("PROXY_URL")
-    proxies = {"http": proxy_url, "https": proxy_url}
+app = Flask(__name__)
 
-    # Selenium WebDriver setup
-    options = Options()
-    options.add_argument("--headless")
-    options.add_argument("--disable-gpu")
-    driver_path = "path/to/chromedriver"  # Update with your ChromeDriver path
-    service = Service(driver_path)
-    driver = webdriver.Chrome(service=service, options=options)
+def run_selenium_script():
+    # MongoDB setup
+    client = MongoClient("mongodb://localhost:27017/")
+    db = client['selenium_db']
+    collection = db['script_results']
 
-    # Login to Twitter
-    driver.get("https://twitter.com/login")
-    driver.find_element(By.NAME, "username").send_keys(os.getenv("TWITTER_USERNAME"))
-    driver.find_element(By.NAME, "password").send_keys(os.getenv("TWITTER_PASSWORD"))
-    driver.find_element(By.XPATH, "//div[contains(text(),'Log in')]").click()
+    # Generate unique ID
+    unique_id = str(uuid.uuid4())
 
-    # Fetch trending topics
-    driver.get("https://twitter.com")
-    trending_topics = driver.find_elements(By.XPATH, "//section//span")[:5]
-    trends = [topic.text for topic in trending_topics]
+    # Selenium setup
+    driver = webdriver.Chrome()  # Ensure ChromeDriver is installed
+    driver.get("http://127.0.0.1:5000/")  # Replace with the actual URL
 
-    # Close the driver
+    # Scrape trends (Example: Replace with actual selectors)
+    trends = [driver.find_element(By.XPATH, f"//xpath{i}").text for i in range(1, 6)]
+
+    # Get IP address
+    ip_address = socket.gethostbyname(socket.gethostname())
+
+    # Get current date and time
+    end_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    # Prepare data
+    data = {
+        "unique_id": unique_id,
+        "nameoftrend1": trends[0],
+        "nameoftrend2": trends[1],
+        "nameoftrend3": trends[2],
+        "nameoftrend4": trends[3],
+        "nameoftrend5": trends[4],
+        "date_time": end_time,
+        "ip_address": ip_address
+    }
+
+    # Save to MongoDB
+    collection.insert_one(data)
     driver.quit()
 
-    # Prepare result
-    result = {
-        "unique_id": datetime.now().strftime("%Y%m%d%H%M%S"),
-        "trends": trends,
-        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "ip_address": requests.get("https://api.ipify.org", proxies=proxies).text
-    }
-    return result
+    return data
+
+@app.route('/run_script', methods=['GET'])
+def run_script():
+    try:
+        result = run_selenium_script()
+        
+        # Fetch the latest record from MongoDB
+        client = MongoClient("mongodb://localhost:27017/")
+        db = client['selenium_db']
+        collection = db['script_results']
+        latest_record = collection.find_one(sort=[("_id", -1)])  # Fetch the latest record
+
+        # Check if record exists
+        if latest_record:
+            latest_record["_id"] = str(latest_record["_id"])  # Convert ObjectId to string for JSON serialization
+            return jsonify(latest_record)
+        else:
+            return jsonify({"error": "No records found"}), 404
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(debug=True)

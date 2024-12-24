@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Script Results</title>
+</head>
+<body>
+    <h1>These are the most happening topics as on {{ trends.date_time }}</h1>
+    <ul>
+        <li>{{ trends.nameoftrend1 }}</li>
+        <li>{{ trends.nameoftrend2 }}</li>
+        <li>{{ trends.nameoftrend3 }}</li>
+        <li>{{ trends.nameoftrend4 }}</li>
+        <li>{{ trends.nameoftrend5 }}</li>
+    </ul>
+    <p>The IP address used for this query was {{ trends.ip_address }}.</p>
+    <h2>Here’s a JSON extract of this record from the MongoDB:</h2>
+    <pre>{{ json_extract }}</pre>
+    <a href="/">Click here to run the query again</a>
+</body>
+</html>
