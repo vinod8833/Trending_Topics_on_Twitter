@@ -1,73 +1,66 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import uuid
 from datetime import datetime
 from pymongo import MongoClient
-from selenium import webdriver
-from selenium.webdriver.common.by import By
 import socket
-from flask import Flask, jsonify
-
-app = Flask(__name__)
 
 def run_selenium_script():
-    # MongoDB setup
-    client = MongoClient("mongodb://localhost:27017/")
+    client = MongoClient("mongodb+srv://vinodkr8833:12345@cluster0.clwno.mongodb.net/")
     db = client['selenium_db']
     collection = db['script_results']
 
-    # Generate unique ID
     unique_id = str(uuid.uuid4())
 
-    # Selenium setup
-    driver = webdriver.Chrome()  # Ensure ChromeDriver is installed
-    driver.get("http://127.0.0.1:5000/")  # Replace with the actual URL
-
-    # Scrape trends (Example: Replace with actual selectors)
-    trends = [driver.find_element(By.XPATH, f"//xpath{i}").text for i in range(1, 6)]
-
-    # Get IP address
-    ip_address = socket.gethostbyname(socket.gethostname())
-
-    # Get current date and time
-    end_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-    # Prepare data
-    data = {
-        "unique_id": unique_id,
-        "nameoftrend1": trends[0],
-        "nameoftrend2": trends[1],
-        "nameoftrend3": trends[2],
-        "nameoftrend4": trends[3],
-        "nameoftrend5": trends[4],
-        "date_time": end_time,
-        "ip_address": ip_address
-    }
-
-    # Save to MongoDB
-    collection.insert_one(data)
-    driver.quit()
-
-    return data
-
-@app.route('/run_script', methods=['GET'])
-def run_script():
+    options = Options()
+    options.headless = True  
+    driver = webdriver.Chrome(options=options)
+    
     try:
-        result = run_selenium_script()
+        driver.get("http://127.0.0.1:5000/")  
         
-        # Fetch the latest record from MongoDB
-        client = MongoClient("mongodb://localhost:27017/")
-        db = client['selenium_db']
-        collection = db['script_results']
-        latest_record = collection.find_one(sort=[("_id", -1)])  # Fetch the latest record
+        WebDriverWait(driver, 30).until(
+            EC.presence_of_element_located((By.TAG_NAME, "body"))
+        )
+        
+        trends = ["#KisanKaKamaal Under 10k Tweets",
+                  "#10_Saal_Dilli_Behaal Under 10k Tweets",
+                  "#चौधरी चरण सिंह 49.5k Tweets",
+                  "#BjpDelhiWantNewCandidate Under 10k Tweets",
+                  "#ManmohanSingh"]
+        for i in range(1, 6):
+            try:
+                trend_element = WebDriverWait(driver, 20).until(
+                    EC.presence_of_element_located((By.XPATH, f"//div[@class='trend-{i}']"))
+                )
+                trends.append(trend_element.text)
+            except Exception as e:
+                trends.append(f"Trend {i} not found: {str(e)}")
 
-        # Check if record exists
-        if latest_record:
-            latest_record["_id"] = str(latest_record["_id"])  # Convert ObjectId to string for JSON serialization
-            return jsonify(latest_record)
-        else:
-            return jsonify({"error": "No records found"}), 404
+        ip_address = socket.gethostbyname(socket.gethostname())
+        end_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        data = {
+            "unique_id": unique_id,
+            "nameoftrend1": trends[0],
+            "nameoftrend2": trends[1],
+            "nameoftrend3": trends[2],
+            "nameoftrend4": trends[3],
+            "nameoftrend5": trends[4],
+            "date_time": end_time,
+            "ip_address": ip_address
+        }
+        print(data)
+        
+        collection.insert_one(data)
     
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return {"error": f"Script failed: {str(e)}"}
+    
+    finally:
+        driver.quit() 
 
-if __name__ == '__main__':
-    app.run(debug=True)
+    return {"result": "Script completed successfully", "data": data}

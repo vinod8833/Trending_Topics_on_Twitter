@@ -15,18 +15,27 @@ def home():
 
 @app.route("/run-script", methods=["GET"])
 def run_script():
-    # Run Selenium script and fetch result
-    result = run_selenium_script()
-    
-    # Fetch the latest MongoDB document for display
-    latest_record = collection.find_one(sort=[("_id", -1)])
-    latest_record["_id"] = str(latest_record["_id"])  # Convert ObjectId to string for JSON serialization
+    try:
+        result = run_selenium_script()
+        
+        latest_record = collection.find_one(sort=[("_id", -1)])
+        
+        if latest_record:
+            latest_record["_id"] = str(latest_record["_id"])  
+        else:
+            latest_record = {"error": "No records found in MongoDB"}
 
-    return render_template(
-        "results.html",
-        trends=result,
-        json_extract=latest_record
-    )
+        return render_template(
+            "results.html",
+            trends=result,
+            json_extract=latest_record
+        )
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+
+
+

@@ -6,17 +6,28 @@
     <title>Script Results</title>
 </head>
 <body>
-    <h1>These are the most happening topics as on {{ trends.date_time }}</h1>
+    <h1>These are the most happening topics as on {{ trends['date_time'] }}</h1>
     <ul>
-        <li>{{ trends.nameoftrend1 }}</li>
-        <li>{{ trends.nameoftrend2 }}</li>
-        <li>{{ trends.nameoftrend3 }}</li>
-        <li>{{ trends.nameoftrend4 }}</li>
-        <li>{{ trends.nameoftrend5 }}</li>
+        <li>{{ json_extract.nameoftrend1 }}</li>
+        <li>{{ json_extract.nameoftrend2 }}</li>
+        <li>{{ json_extract.nameoftrend3 }}</li>
+        <li>{{ json_extract.nameoftrend4 }}</li>
+        <li>{{ json_extract.nameoftrend5 }}</li>
     </ul>
-    <p>The IP address used for this query was {{ trends.ip_address }}.</p>
+    <p>The IP address used for this query was {{ trends['ip_address'] }}.</p>
     <h2>Here’s a JSON extract of this record from the MongoDB:</h2>
-    <pre>{{ json_extract }}</pre>
-    <a href="/">Click here to run the query again</a>
+    <pre>
+    [
+    {
+        "_id": "{{ json_extract['_id'] }}",
+        "nameoftrend1": "{{ json_extract.nameoftrend1 }}",
+        "nameoftrend2": "{{ json_extract.nameoftrend2 }}",
+        "nameoftrend3": "{{ json_extract.nameoftrend3 }}",
+        "nameoftrend4": "{{ json_extract.nameoftrend4 }}",
+        "nameoftrend5": "{{ json_extract.nameoftrend5 }}"
+    }
+    ]
+    </pre>
+    <button onclick="window.location.href='/'">Run Again</button>
 </body>
 </html>

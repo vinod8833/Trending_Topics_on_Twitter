@@ -4,9 +4,77 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Run Selenium Script</title>
+    <style>
+        /* Reset some default styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body and background styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f7fa;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        /* Container for the content */
+        .container {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        /* Header styling */
+        h1 {
+            font-size: 2.5rem;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+
+        /* Link button styling */
+        a {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        /* Hover effect for the link button */
+        a:hover {
+            background-color: #45a049;
+            transform: translateY(-5px);
+        }
+
+        /* Add responsive design for smaller screens */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2rem;
+            }
+            a {
+                padding: 12px 25px;
+                font-size: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Selenium Script Runner</h1>
-    <a href="/run-script">Click here to run the script</a>
+    <div class="container">
+        <h1>Selenium Script Runner</h1>
+        <a href="/run-script">Click here to run the script</a>
+    </div>
 </body>
 </html>
