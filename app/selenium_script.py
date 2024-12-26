@@ -9,7 +9,7 @@ from pymongo import MongoClient
 import socket
 
 def run_selenium_script():
-    client = MongoClient("mongodb+srv://vinodkr8833:12345@cluster0.clwno.mongodb.net/")
+    client = MongoClient("_________________")
     db = client['selenium_db']
     collection = db['script_results']
 

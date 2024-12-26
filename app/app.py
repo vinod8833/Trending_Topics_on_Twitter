@@ -5,7 +5,7 @@ from pymongo import MongoClient
 app = Flask(__name__)
 
 # MongoDB setup
-client = MongoClient("mongodb+srv://vinodkr8833:12345@cluster0.clwno.mongodb.net/")
+client = MongoClient("___________")
 db = client['selenium_db']
 collection = db['script_results']
 
